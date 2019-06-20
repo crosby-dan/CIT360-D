@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * @author Dan Crosby  CIT360
  * 6/10/19
- * A class for demonstrating MVC - Controller which coordinates the interaction between ie wand model.
+ * A class for demonstrating MVC - Controller which coordinates the interaction between view and model.
  */
 public class TriviaController {
    private simpletrivia model;
