@@ -1,11 +1,14 @@
 package model;
 
 import mvc.Model;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
-import javax.persistence.*;
 import java.util.List;
+
+import javax.persistence.*;
 
 /**
  * @author Dan Crosby  CIT360
@@ -30,7 +33,7 @@ public class simpletrivia extends Model {
      * Method getId
      * <p>Getter for the ID property</p>
      *
-     * @returns  int - the ID from the database for the current question
+     * @return  int - the ID from the database for the current question
      */
     public int getId() {
         return id;
@@ -40,7 +43,7 @@ public class simpletrivia extends Model {
      * Method getQuestion
      * <p>Getter for the question property</p>
      *
-     * @returns  String - the question from the database for the current question
+     * @return  String - the question from the database for the current question
      */
     public String getQuestion() { return this.question; }
 
@@ -48,7 +51,7 @@ public class simpletrivia extends Model {
      * Method getAnswer
      * <p>Getter for the correct_answer property</p>
      *
-     * @returns  boolean - the correct_answer from the database for the current question
+     * @return  boolean - the correct_answer from the database for the current question
      */
     public boolean getAnswer() {
         //System.out.format("Debug 2 question %s,answer %b",question,correct_answer);
@@ -73,9 +76,8 @@ public class simpletrivia extends Model {
      * @param  correct_answer - The value can be True or False for a true false question
      * @param  category - the category of question, which can be any text general description like "80's".
      */
-    public simpletrivia(String question, String type, String difficulty, String correct_answer, String category) {
+    private simpletrivia(String question, String type, String difficulty, String correct_answer, String category) {
         super( );
-        //this.id=21;
         this.question=question;
         this.category=category;
         this.type=type;
@@ -88,23 +90,24 @@ public class simpletrivia extends Model {
      * <p>Locate a random question and persist it using Entity Manager</p><
      * <p>Settings for the database connection can be found in META-INF - persistence</p>
      *
-     * @returns simpletrivia - A reference to this java class containing the properties of the retrieved question
+     * @return simpletrivia - A reference to this java class containing the properties of the retrieved question
      */
     public simpletrivia getRandomQuestion() {
         int random=ThreadLocalRandom.current().nextInt(1, getMaxID());
 
         try {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory(
-                    "MyPersistenceUnit");
-            EntityManager entityManager = emf.createEntityManager();
-            //entityManager.getTransaction().begin();
+            SessionFactory factory = new Configuration()
+                    .configure("hibernate.cfg.xml")
+                    .addAnnotatedClass(simpletrivia.class)
+                    .buildSessionFactory();
 
-            String qlQuery = "from simpletrivia where id=" + Integer.toString(random);
+            EntityManager entityManager = factory.createEntityManager();
+
+            String qlQuery = "from simpletrivia where id=" + random;
             Query query = entityManager.createQuery(qlQuery);
             List<?> list = query.getResultList();
-            simpletrivia triviaModel =(simpletrivia)list.get(0);
+            return (simpletrivia)list.get(0);
             //System.out.format("DEBUG from model: Question %d : %s (%s)",random, triviaModel.question,triviaModel.correct_answer);
-            return triviaModel;
         }
         catch(Exception e){
             System.out.println(e.getMessage());
@@ -116,7 +119,7 @@ public class simpletrivia extends Model {
      * Method toString
      * <p>Provide a text based equivalent of the selected trivia object</p>
      *
-     * @returns String - A formatted description of the trivia question.
+     * @return String - A formatted description of the trivia question.
      */
     @Override
     public String toString() {
@@ -128,14 +131,17 @@ public class simpletrivia extends Model {
      * <p>Locate the highest ID number in the database</p><
      * <p>Settings for the database connection can be found in META-INF - persistence</p>
      *
-     * @returns int - The highest ID property in the database.   Note:  Current code assumes that all ID numbers will be sequential.
+     * @return int - The highest ID property in the database.   Note:  Current code assumes that all ID numbers will be sequential.
      */
-    public static int getMaxID() {
+    private static int getMaxID() {
         int i=0;
         try {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory(
-                    "MyPersistenceUnit");
-            EntityManager entityManager = emf.createEntityManager();
+            SessionFactory factory = new Configuration()
+                    .configure("hibernate.cfg.xml")
+                    .addAnnotatedClass(simpletrivia.class)
+                    .buildSessionFactory();
+
+            EntityManager entityManager = factory.createEntityManager();
 
             String qlQuery = "select id from simpletrivia ";
             Query query = entityManager.createQuery(qlQuery);
@@ -156,7 +162,7 @@ public class simpletrivia extends Model {
      *
      * @param newQuestion - newQuestion(0) is the text of the question, and newQuestion(1) is the True/False answer.
      *
-     * @returns boolean - True = question successfully added.
+     * @return boolean - True = question successfully added.
      */
         public static boolean createQuestion ( ArrayList<String> newQuestion) {
 
@@ -164,19 +170,23 @@ public class simpletrivia extends Model {
             //This command can only work with 2 inputs
             return false;
         }
-        EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "MyPersistenceUnit" );
+        SessionFactory factory = new Configuration()
+                .configure("hibernate.cfg.xml")
+                .addAnnotatedClass(simpletrivia.class)
+                .buildSessionFactory();
 
-        EntityManager entitymanager = emfactory.createEntityManager( );
-        entitymanager.getTransaction( ).begin( );
+        EntityManager entityManager = factory.createEntityManager();
+
+        entityManager.getTransaction( ).begin( );
 
         //String question, String type, String difficulty, String correct_answer, String category
         simpletrivia st = new simpletrivia(newQuestion.get(0),"boolean","easy",newQuestion.get(1),"user added");
-        entitymanager.persist( st );
+        entityManager.persist( st );
 
-        entitymanager.getTransaction( ).commit( );
+        entityManager.getTransaction( ).commit( );
 
-        entitymanager.close( );
-        emfactory.close( );
+        entityManager.close( );
+        factory.close( );
         return true;
 
     }

@@ -16,7 +16,7 @@
           <factory-entry name="NewPersistenceUnit" />
         </datasource-mapping>
         <naming-strategy-map />
-        <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/META-INF/persistence.xml" />
+        <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/META-INF/persistence.old.xml" />
       </configuration>
     </facet>
   </component>

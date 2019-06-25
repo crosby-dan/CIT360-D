@@ -3,6 +3,9 @@ package controller;
 import model.simpletrivia;
 import view.TriviaView;
 import java.util.ArrayList;
+
+import static model.simpletrivia.createQuestion;
+
 /**
  * @author Dan Crosby  CIT360
  * 6/10/19
@@ -32,7 +35,7 @@ public class TriviaController {
            if (answer.equalsIgnoreCase("a"))
            {
                ArrayList<String> newQuestion = view.addNewQuestionPrompts();
-               if (!model.createQuestion(newQuestion)) {
+               if (!(createQuestion(newQuestion))) {
                    view.showFailed("Invalid prompts");
                }
                else {
@@ -53,13 +56,12 @@ public class TriviaController {
      * <p>Request a random question from the model</p><
      * <p>Call the view to display the question and capture a response</p>
      *
-     * @returns boolean - True = question successfully added.
+     * @return boolean - True = question successfully added.
      */
-    public boolean playQuestion() {
+    private boolean playQuestion() {
 
         //randomly locate a question
         simpletrivia myRandomQuestion = model.getRandomQuestion();
-        //System.out.format ("Debug 2 - correct answer=%s\n",myRandomQuestion.getAnswer());
         //Determine if the user is choosing true or false
         String answer = view.getQuizResponse(myRandomQuestion.getQuestion());
 
@@ -67,7 +69,7 @@ public class TriviaController {
         if (answer.equalsIgnoreCase("q")) return false;
 
         //Parse the text input into a boolean true or false
-        boolean bAnswer = (answer.equalsIgnoreCase("t")) ? true : false;
+        boolean bAnswer = answer.equalsIgnoreCase("t");
 
         //Show correct or false depending on if the answers match.
         if (myRandomQuestion.getAnswer()==bAnswer) {
